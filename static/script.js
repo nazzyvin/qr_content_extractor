@@ -245,6 +245,7 @@ pasteBtn.addEventListener("click", async () => {
 
 async function handleFile(file) {
   if (!file) return;
+  clearResults();
   showSpinner(true);
   const form = new FormData();
   form.append("file", file);
@@ -277,6 +278,12 @@ function handleData(data) {
 function showEmptyState(show) {
   emptyState.classList.toggle("hidden", !show);
   resultEl.classList.toggle("hidden", show);
+}
+
+function clearResults() {
+  hidePicker();
+  showEmptyState(true);
+  current = null;
 }
 
 function renderResult(item) {
@@ -627,7 +634,7 @@ async function sendFrame() {
   try {
     const res = await fetch("/api/decode", { method: "POST", body: form });
     const data = await res.json();
-    if (data.success) { stopCamera(); handleData(data); }
+    if (data.success && success) { stopCamera(); handleData(data); }
   } catch { /* keep scanning on transient errors */ }
   finally { frameInFlight = false; }
 }
@@ -638,10 +645,8 @@ async function sendFrame() {
 
 decodeAgainBtn.addEventListener("click", () => {
   stopCamera();
-  hidePicker();
-  showEmptyState(true);
+  clearResults();
   showSpinner(false);
-  current = null;
   fileInput.value = "";
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
